@@ -35,7 +35,7 @@ const autocomplete = (input, list) => {
         listDIV.setAttribute("id", e.target.id + "autocomplete-list");
         listDIV.setAttribute("class", "autocomplete-items");
 
-        document.getElementById("content").appendChild(listDIV);
+        document.getElementById("autocomplete_container").appendChild(listDIV);
 
         let option;
 
@@ -185,13 +185,73 @@ const handleRequest = async() => {
     }
 }
 
+const requestTownsCount = () => {
+    const url = 'http://localhost:3000/api/get-towns-count/';
+
+    return new Promise((resolve, reject) => {
+        fetch(url).then(response => {
+            return response.json();
+        }).then(data => {
+            resolve(data.result);
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
+const requestMunicipalitiesCount = () => {
+    const url = 'http://localhost:3000/api/get-municipalities-count/';
+
+    return new Promise((resolve, reject) => {
+        fetch(url).then(response => {
+            return response.json();
+        }).then(data => {
+            resolve(data.result);
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
+const requestProvincesCount = () => {
+    const url = 'http://localhost:3000/api/get-provinces-count/';
+
+    return new Promise((resolve, reject) => {
+        fetch(url).then(response => {
+            return response.json();
+        }).then(data => {
+            resolve(data.result);
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}
+
+const showCounts = async() => {
+    try {
+        const townsCount = await requestTownsCount();
+        const municipalitiesCount = await requestMunicipalitiesCount();
+        const provincesCount = await requestProvincesCount();
+
+        let placeholder = `Потърси между ${townsCount} населени места от ${municipalitiesCount} общини в ${provincesCount} области`;;
+
+        document.getElementById("search_input").placeholder = placeholder;
+    } catch {
+        console.log({ error: "Error while showing counts" });
+    }
+}
+
 window.onload = () => {
+    showCounts();
+
     document.getElementById("search_btn").addEventListener('click', () => {
         let previousResults = document.getElementsByClassName('result-box');
         let parentNode = document.getElementById('content');
 
-        for (let i = 0; i < previousResults.length; i++) {
-            parentNode.removeChild(previousResults[i]);
+        const length = previousResults.length;
+
+        for (let i = 0; i < length; i++) {
+            parentNode.removeChild(previousResults[0]);
         }
 
         handleRequest();
